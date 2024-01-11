@@ -45,8 +45,8 @@ ONE_AT_A_TIME = False
 ONE_PER_DRIVE = False
 
 # Short & long sleep durations upon various error conditions
-SLEEP_FOR = 60 * 3
-SLEEP_FOR_LONG = 60 * 20
+SLEEP_FOR = 60 * 1
+SLEEP_FOR_LONG = 60 * 3
 
 RSYNC_CMD = "rsync"
 
@@ -106,10 +106,10 @@ async def plow(dest, plot_queue, loop):
             if dest_path.exists():
                 # Make sure it's actually a mount, and not our root filesystem.
                 if not dest_path.is_mount():
-                    print(f"Farm destination {dest_path} is not mounted. Trying again later.")
-                    await plot_queue.put(plot)
-                    await asyncio.sleep(SLEEP_FOR)
-                    continue
+                    print(f"WARNNING: Farm destination {dest_path} is not mounted.")
+                    # await plot_queue.put(plot)
+                    # await asyncio.sleep(SLEEP_FOR)
+                    # continue
 
                 plot_size = plot.stat().st_size
                 dest_free = shutil.disk_usage(dest).free
@@ -131,15 +131,15 @@ async def plow(dest, plot_queue, loop):
                 print(f"🚜 {plot} ➡️  {dest}")
 
                 # Send a quick test copy to make sure we can write, or fail early.
-                test_cmd = f"rsync /etc/hostname {dest}"
-                proc = await asyncio.create_subprocess_shell(
-                    test_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-                )
-                stdout, stderr = await proc.communicate()
-                if proc.returncode != 0:
-                    print(f"⁉️  {test_cmd!r} exited with {proc.returncode}")
-                    await plot_queue.put(plot)
-                    break
+                # test_cmd = f"rsync /etc/hostname {dest}"
+                # proc = await asyncio.create_subprocess_shell(
+                #     test_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+                # )
+                # stdout, stderr = await proc.communicate()
+                # if proc.returncode != 0:
+                #     print(f"⁉️  {test_cmd!r} exited with {proc.returncode}")
+                #     await plot_queue.put(plot)
+                #     break
 
                 # Now rsync the real plot
                 proc = await asyncio.create_subprocess_shell(
